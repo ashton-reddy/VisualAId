@@ -1,0 +1,79 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="content" style="display:none">
+    <table width="100%">
+        <tr>
+            <td></td>
+            <td></td>
+        </tr>
+        <td></td>
+        <td>
+            <button id="startRecognizeAsyncButton">Start recognition</button>
+            <button id="stopRecognizeAsyncButton">Stop recognition</button>
+        </td>
+
+        </tr>
+        <tr>
+            <td align="right" valign="top"></td>
+            <td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
+        </tr>
+    </table>
+</div>
+
+<script src="~/js/microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
+
+<script>
+    // status fields and start button in UI
+    var subscriptionKey = "374a01c7afc14078942664634616b406";
+    var serviceRegion = "eastus";
+    var phraseDiv;
+    var startRecognizeAsyncButton;
+    var stopRecognizeAsyncButton;
+    var SpeechSDK;
+    var recognizer;
+    document.addEventListener("DOMContentLoaded", function () {
+        startRecognizeAsyncButton = document.getElementById("startRecognizeAsyncButton");
+        stopRecognizeAsyncButton = document.getElementById("stopRecognizeAsyncButton");
+        stopRecognizeAsyncButton.disabled = true;
+        phraseDiv = document.getElementById("phraseDiv");
+        var speechConfig;
+        speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+        speechConfig.speechRecognitionLanguage = "en-US";
+        var audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+        recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+
+        startRecognizeAsyncButton.addEventListener("click", function () {
+            startRecognizeAsyncButton.disabled = true;
+            stopRecognizeAsyncButton.disabled = false;
+            phraseDiv.innerHTML = "";
+
+            recognizer.startContinuousRecognitionAsync();
+            recognizer.recognized = function (s, e) {
+                phraseDiv.innerHTML += e.result.text;
+            };
+        });
+
+        stopRecognizeAsyncButton.addEventListener("click", function () {
+            startRecognizeAsyncButton.disabled = false;
+            stopRecognizeAsyncButton.disabled = true;
+            recognizer.stopContinuousRecognitionAsync();
+
+        });
+        if (!!window.SpeechSDK) {
+            SpeechSDK = window.SpeechSDK;
+            startRecognizeAsyncButton.disabled = false;
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('warning').style.display = 'none';
+            // in case we have a function for getting an authorization token, call it.
+            if (typeof RequestAuthorizationToken === "function") {
+                RequestAuthorizationToken();
+            }
+        }
+    });
+</script>
+<!-- </quickstartcode> -->
+
