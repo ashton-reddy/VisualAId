@@ -20,3 +20,16 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+#imageContainer {
+    max-width: 1002px; /* Set the maximum width of the container */
+    max-height: 300px; /* Set the maximum height of the container */
+    overflow: hidden; /* Hide any part of the image that exceeds the container */
+}
+
+#myImage {
+    max-width: 500px; /* Ensure the image does not exceed the container's width */
+    max-height: 300px; /* Ensure the image does not exceed the container's height */
+    display: block; /* Remove any extra space around the image */
+    margin: 0 auto; /* Center the image horizontally in the container (optional) */
+}

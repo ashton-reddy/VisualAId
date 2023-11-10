@@ -19,10 +19,97 @@
         </tr>
         <tr>
             <td align="right" valign="top"></td>
-            <td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
+            <td><textarea id="phraseDiv" style="display: inline-block;width:1002px;height:150px"></textarea></td>
         </tr>
     </table>
 </div>
+
+<div id="imageContainer">
+    <table width="100%">
+        <tr>
+            <td style="width:500px">
+                <img id="myImage" src="Blank.jpg" alt="Your Image">
+            </td>
+            <td style="width:500px"><textarea id="descriptionDiv" style="display: inline-block;width:500px;height:299px"></textarea></td>
+        </tr>
+</div>
+
+
+<script>
+    function SearchBingEntity(query) {
+        const apiKey = 'ba21ac0dbfb64c6fa1ac0d316d72311a'; // Replace with your Bing API key
+        const apiUrl = `https://api.bing.microsoft.com/v7.0/entities?mkt=en-US&q=${encodeURIComponent(query)}`;
+
+        fetch(apiUrl, {
+            headers: {
+                'Ocp-Apim-Subscription-Key': apiKey,
+            },
+        })
+            .then((response) => {
+                if (response.status !== 200) {
+                    console.log(`Error: ${response.status} - ${response.statusText}`);
+                    return;
+                }
+                return response.json();
+            })
+            .then((data) => {
+
+                const entities = data.entities;
+                descriptionDiv.innerHTML = entities.value[0].description;
+                
+                // Set the image
+                if (entities.value[0].image) {
+                    var imageElement = document.getElementById('myImage');
+                    imageElement.src = entities.value[0].image.hostPageUrl;
+                } else {
+                    SearchBingImage(query);
+
+                }
+
+
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+    function SearchBingImage(query) {
+        const apiKey = 'ba21ac0dbfb64c6fa1ac0d316d72311a'; // Replace with your Bing API key
+        const apiUrl = `https://api.bing.microsoft.com/v7.0/images/search?q=${encodeURIComponent(query)}`;
+
+        fetch(apiUrl, {
+            headers: {
+                'Ocp-Apim-Subscription-Key': apiKey,
+            },
+        })
+            .then((response) => {
+                if (response.status !== 200) {
+                    console.log(`Error: ${response.status} - ${response.statusText}`);
+                    return;
+                }
+                return response.json();
+            })
+            .then((data) => {
+
+                const images = data.value;
+
+                // Check if there are images in the response
+                if (images.length > 0) {
+                    // Select the most relevant image (usually the first one in the list)
+                    const mostRelevantImage = images[0];
+                    var imageElement = document.getElementById('myImage');
+                    imageElement.src = mostRelevantImage.contentUrl;
+                } else {
+                    console.log('No images found for the query.');
+                }
+
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+</script>
 
 <script src="~/js/microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
 
@@ -54,6 +141,7 @@
             recognizer.startContinuousRecognitionAsync();
             recognizer.recognized = function (s, e) {
                 phraseDiv.innerHTML += e.result.text;
+                SearchBingEntity(e.result.text);
             };
         });
 
@@ -75,5 +163,7 @@
         }
     });
 </script>
+
+
 <!-- </quickstartcode> -->
 
